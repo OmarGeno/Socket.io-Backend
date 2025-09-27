@@ -1,0 +1,2 @@
+export declare const io: import("socket.io").Server<import("socket.io").DefaultEventsMap, import("socket.io").DefaultEventsMap, import("socket.io").DefaultEventsMap, any>, orderService: import("./services/websockets.io.service.js").OrderService;
+//# sourceMappingURL=app.d.ts.map
