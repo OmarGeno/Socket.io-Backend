@@ -1,13 +1,5 @@
 import { Server, Socket } from "socket.io";
-export interface Order {
-    orderId: string;
-    customerId: string;
-    restaurantId: string;
-    items: any[];
-    placedAt?: Date;
-    updatedAt?: Date;
-    status: string;
-}
+import { Order } from "../models/order.js";
 export declare class OrderService {
     private orders;
     private nextId;
@@ -17,7 +9,7 @@ export declare class OrderService {
     placeOrder: (order: Omit<Order, "orderId" | "placedAt" | "status">) => Order;
     getOrderById: (orderId: string) => Order | undefined;
     getAllOrders: () => Order[];
-    updateOrderStatus: (orderId: string, status: string) => Order | undefined;
+    updateOrderStatus: (orderId: string, status: any) => Order | undefined;
     deleteOrder: (orderId: string) => boolean;
     registerClient: (socket: Socket, userId: string) => void;
 }

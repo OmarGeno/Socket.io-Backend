@@ -14,7 +14,13 @@ export class OrderService {
             this.orders.push(newOrder);
             console.log(`📢 Sending order ${newOrder.orderId} to restaurant ${newOrder.restaurantId}`);
             // 🔔 Notify only the restaurant
-            this.io.to(newOrder.restaurantId).emit("ReceiveOrder", newOrder);
+            const restaurantSocket = this.userSockets[newOrder.restaurantId];
+            if (restaurantSocket) {
+                restaurantSocket.emit("ReceiveOrder", newOrder);
+            }
+            else {
+                console.log(`⚠️ Restaurant ${order.restaurantId} not connected`);
+            }
             return newOrder;
         };
         this.getOrderById = (orderId) => {
@@ -30,9 +36,13 @@ export class OrderService {
             existingOrder.status = status;
             existingOrder.updatedAt = new Date();
             // 🔔 Notify only the customer
-            this.io
-                .to(existingOrder.customerId)
-                .emit("ReceiveOrderStatus", existingOrder);
+            const customerSocket = this.userSockets[existingOrder.customerId];
+            if (customerSocket) {
+                customerSocket.emit("ReceiveOrderStatus", existingOrder);
+            }
+            else {
+                console.log(`⚠️ Customer ${existingOrder.customerId} not connected`);
+            }
             return existingOrder;
         };
         this.deleteOrder = (orderId) => {

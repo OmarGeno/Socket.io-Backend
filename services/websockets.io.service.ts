@@ -1,14 +1,5 @@
 import { Server, Socket } from "socket.io";
-
-export interface Order {
-  orderId: string;
-  customerId: string;
-  restaurantId: string;
-  items: any[];
-  placedAt?: Date;
-  updatedAt?: Date;
-  status: string;
-}
+import { Order } from "../models/order.js";
 
 export class OrderService {
   private orders: Order[] = [];
@@ -38,7 +29,12 @@ export class OrderService {
     );
 
     // 🔔 Notify only the restaurant
-    this.io.to(newOrder.restaurantId).emit("ReceiveOrder", newOrder);
+    const restaurantSocket = this.userSockets[newOrder.restaurantId];
+    if (restaurantSocket) {
+      restaurantSocket.emit("ReceiveOrder", newOrder);
+    } else {
+      console.log(`⚠️ Restaurant ${order.restaurantId} not connected`);
+    }
 
     return newOrder;
   };
@@ -51,7 +47,7 @@ export class OrderService {
     return this.orders;
   };
 
-  updateOrderStatus = (orderId: string, status: string): Order | undefined => {
+  updateOrderStatus = (orderId: string, status: any): Order | undefined => {
     const existingOrder = this.orders.find((o) => o.orderId === orderId);
     if (!existingOrder) return undefined;
 
@@ -59,9 +55,12 @@ export class OrderService {
     existingOrder.updatedAt = new Date();
 
     // 🔔 Notify only the customer
-    this.io
-      .to(existingOrder.customerId)
-      .emit("ReceiveOrderStatus", existingOrder);
+    const customerSocket = this.userSockets[existingOrder.customerId];
+    if (customerSocket) {
+      customerSocket.emit("ReceiveOrderStatus", existingOrder);
+    } else {
+      console.log(`⚠️ Customer ${existingOrder.customerId} not connected`);
+    }
 
     return existingOrder;
   };
